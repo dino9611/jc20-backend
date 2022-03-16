@@ -1,4 +1,5 @@
 // cara import di commonJs atau dibawah es6
+// import http from 'http'
 const http = require("http");
 // const fs = require("fs");
 // const fs = require("fs/promises");
@@ -11,7 +12,7 @@ const {
   existsSync,
   mkdirSync,
   readFile,
-} = require("fs");
+} = require("fs/promises");
 const path = require("path");
 const PORT = 4000;
 
@@ -23,16 +24,23 @@ let database = [
   },
 ];
 
+const { bebas, kirimEmail } = require("./helper");
+// console.log(sesuatu.bebas);
+
+let angka = 1;
 const server = http.createServer(async (req, res) => {
   // console.log(req); // coba lihat yaa diterminal
   // console.log(req.url)
-
   if (req.url === "/" && req.method === "GET") {
+    console.log(angka);
+    angka++;
     res.writeHead(200, { "Content-type": "text/html" });
-    console.log(__dirname);
+    kirimEmail("aqil@gmail.com");
+    // console.log(__dirname);
+    // dirname adaalah alamat folder file ini
     // path resolve
-    console.log(path.resolve(__dirname, "./index.html"));
-    let index = await fs.readFile(
+    // console.log(path.resolve(__dirname, "./index.html"));
+    let index = await readFile(
       path.resolve(__dirname, "./index.html"),
       "utf-8"
     );
