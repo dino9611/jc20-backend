@@ -4,15 +4,34 @@ const http = require("http");
 // const fs = require("fs");
 // const fs = require("fs/promises");
 const {
+  appendFile,
+  writeFile: writeFileprom,
+  readFile,
+} = require("fs/promises");
+
+const {
+  writeFile,
   readFileSync,
   writeFileSync,
   appendFileSync,
-  writeFile,
-  appendFile,
   existsSync,
   mkdirSync,
-  readFile,
-} = require("fs/promises");
+} = require("fs");
+
+// cara mengubah callback menjadi promise
+const writeFilePromise = (path, isifile) => {
+  return new Promise((resolve, rejects) => {
+    writeFile(path, isifile, (err) => {
+      if (err) {
+        // kalo reject kebaca maka kodingan akna masuk catch
+        rejects(err);
+      }
+      // klo resolve terbaca maka object akan masuk kedalam res
+      resolve({ message: "berhasil" });
+    });
+  });
+};
+
 const path = require("path");
 const PORT = 4000;
 
@@ -57,24 +76,40 @@ const server = http.createServer(async (req, res) => {
       data += chunk;
     });
     // data setelah loading
-    req.on("end", () => {
+    req.on("end", async () => {
       let newdata = JSON.parse(data);
       if (!existsSync("./files")) {
         mkdirSync("./files");
       }
-      writeFile(
-        `./files/lat${new Date().getTime()}.txt`,
-        newdata.kata,
-        (err) => {
-          if (err) {
-            console.log(err, "TES LINE 50");
-            res.writeHead(500, { "Content-type": "application/json" });
-            return res.end({ message: err });
-          }
-          res.writeHead(200, { "Content-type": "application/json" });
-          return res.end(JSON.stringify({ message: "berhasil" }));
-        }
-      );
+      try {
+        let result = await writeFilePromise(
+          `./files/lat${new Date().getTime()}.txt`,
+          newdata.kata
+        );
+        console.log("ini res", result);
+        // berhasil buat file
+
+        res.writeHead(200, { "Content-type": "application/json" });
+        // serialisasi denan mengubah javascript jadi json
+        return res.end(JSON.stringify(result));
+      } catch (err) {
+        console.error(err, "TES LINE 94");
+        res.writeHead(500, { "Content-type": "application/json" });
+        return res.end(JSON.stringify({ message: err }));
+      }
+      // writeFile(
+      //   `./files/lat${new Date().getTime()}.txt`,
+      //   newdata.kata,
+      //   (err) => {
+      //     if (err) {
+      //       console.log(err, "TES LINE 50");
+      //       res.writeHead(500, { "Content-type": "application/json" });
+      //       return res.end({ message: err });
+      //     }
+      //     res.writeHead(200, { "Content-type": "application/json" });
+      //     return res.end(JSON.stringify({ message: "berhasil" }));
+      //   }
+      // );
     });
   } else {
     res.writeHead(404, { "Content-type": "text/html" });
