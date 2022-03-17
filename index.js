@@ -1,120 +1,79 @@
-// cara import di commonJs atau dibawah es6
-// import http from 'http'
-const http = require("http");
-// const fs = require("fs");
-// const fs = require("fs/promises");
-const {
-  appendFile,
-  writeFile: writeFileprom,
-  readFile,
-} = require("fs/promises");
+const express = require("express");
+const app = express();
+const port = 5000;
+// buat mengaktifkan req.body
+app.use(express.json());
+// buat upload foto dan reserve file
+app.use(express.urlencoded({ extended: false }));
 
-const {
-  writeFile,
-  readFileSync,
-  writeFileSync,
-  appendFileSync,
-  existsSync,
-  mkdirSync,
-} = require("fs");
-
-// cara mengubah callback menjadi promise
-const writeFilePromise = (path, isifile) => {
-  return new Promise((resolve, rejects) => {
-    writeFile(path, isifile, (err) => {
-      if (err) {
-        // kalo reject kebaca maka kodingan akna masuk catch
-        rejects(err);
-      }
-      // klo resolve terbaca maka object akan masuk kedalam res
-      resolve({ message: "berhasil" });
-    });
-  });
-};
-
-const path = require("path");
-const PORT = 4000;
-
-let database = [
+let products = [
+  { id: 1, name: "popok hokage", price: 50000 },
   {
-    id: 1,
-    username: "dino",
-    password: "strong9",
+    id: 2,
+    name: "pasir kazekage",
+    price: 20000,
+  },
+  {
+    id: 3,
+    name: "Gurita adeknya raikage",
+    price: 100000,
   },
 ];
 
-const { bebas, kirimEmail } = require("./helper");
-// console.log(sesuatu.bebas);
+app.get("/", (req, res) => {
+  res.status(200).send({ message: "ini hellow" });
+});
+// req.query .. semua punya || query adalah value setelah tanda tanya
+// di url
+// req.params :semua punya
+// req.body //tidak dimiliki get
 
-let angka = 1;
-const server = http.createServer(async (req, res) => {
-  // console.log(req); // coba lihat yaa diterminal
-  // console.log(req.url)
-  if (req.url === "/" && req.method === "GET") {
-    console.log(angka);
-    angka++;
-    res.writeHead(200, { "Content-type": "text/html" });
-    kirimEmail("aqil@gmail.com");
-    // console.log(__dirname);
-    // dirname adaalah alamat folder file ini
-    // path resolve
-    // console.log(path.resolve(__dirname, "./index.html"));
-    let index = await readFile(
-      path.resolve(__dirname, "./index.html"),
-      "utf-8"
+app.get("/product", (req, res) => {
+  console.log("query isi:", req.query); // req.query adalah object
+  // object bisa di destructuring
+  const { maxPrice, minPrice } = req.query;
+
+  let filteredProd = products.filter((val) => {
+    return (
+      (maxPrice ? val.price <= maxPrice : true) &&
+      (minPrice ? val.price >= minPrice : true)
     );
-    // console.log(index);
-    res.end(index);
-  } else if (req.url === "/user" && req.method === "GET") {
-    res.writeHead(200, { "Content-type": "application/json" });
-    res.end(JSON.stringify(database));
-  } else if (req.url === "/file" && req.method === "POST") {
-    // ambil data dari req.body
-    let data = ``;
-    // trigger saat data masih loading
-    req.on("data", (chunk) => {
-      data += chunk;
-    });
-    // data setelah loading
-    req.on("end", async () => {
-      let newdata = JSON.parse(data);
-      if (!existsSync("./files")) {
-        mkdirSync("./files");
-      }
-      try {
-        let result = await writeFilePromise(
-          `./files/lat${new Date().getTime()}.txt`,
-          newdata.kata
-        );
-        console.log("ini res", result);
-        // berhasil buat file
-
-        res.writeHead(200, { "Content-type": "application/json" });
-        // serialisasi denan mengubah javascript jadi json
-        return res.end(JSON.stringify(result));
-      } catch (err) {
-        console.error(err, "TES LINE 94");
-        res.writeHead(500, { "Content-type": "application/json" });
-        return res.end(JSON.stringify({ message: err }));
-      }
-      // writeFile(
-      //   `./files/lat${new Date().getTime()}.txt`,
-      //   newdata.kata,
-      //   (err) => {
-      //     if (err) {
-      //       console.log(err, "TES LINE 50");
-      //       res.writeHead(500, { "Content-type": "application/json" });
-      //       return res.end({ message: err });
-      //     }
-      //     res.writeHead(200, { "Content-type": "application/json" });
-      //     return res.end(JSON.stringify({ message: "berhasil" }));
-      //   }
-      // );
-    });
-  } else {
-    res.writeHead(404, { "Content-type": "text/html" });
-    res.end("<h1>NotFound</h1>");
-  }
+  });
+  return res.send(filteredProd);
 });
 
-server.listen(PORT, () => console.log("server jalan di port " + PORT));
+app.get("/product/category", (req, res) => {
+  // console.log(productSelected);
+  return res.send({ message: "tidak ada lol" });
+});
+
+app.get("/product/:id", (req, res) => {
+  let { id } = req.params;
+  // param adalah yang titik dua
+  console.log(req.params);
+  let productSelected = products.find((val) => val.id == id);
+  console.log(productSelected);
+  return res.send(productSelected);
+});
+
+app.delete("/product/:id", (req, res) => {
+  let { id } = req.params;
+  // cari index dengan id yang dimau
+  let index = products.findIndex((val) => val.id == id);
+  products.splice(index, 1);
+  return res.send(products);
+});
+
+app.post("/product", (req, res) => {
+  console.log(req.body);
+  let data = { ...req.body, id: products[products.length - 1].id + 1 };
+  products.push(data);
+  // response all products
+  return res.send(products);
+});
+
+app.put("/product/:id", (req, res) => {});
+
+app.listen(port, () => {
+  console.log(`app listening on port ${port}`);
+});
