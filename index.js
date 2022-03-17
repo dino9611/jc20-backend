@@ -72,7 +72,31 @@ app.post("/product", (req, res) => {
   return res.send(products);
 });
 
-app.put("/product/:id", (req, res) => {});
+app.put("/product/:id", (req, res) => {
+  const { id } = req.params;
+  // cari index
+  let index = products.findIndex((val) => val.id == id);
+  // validasi property req.body sama dengan product
+  const arrProp = Object.keys(req.body); //['name','price']
+  const productProp = Object.keys(products[index]); //['name','price','id']
+  console.log(arrProp);
+  console.log(productProp, "product");
+  let lolosValidasi = true;
+  arrProp.forEach((val) => {
+    if (!productProp.includes(val)) {
+      // jika val tidak ada di productsprop
+      lolosValidasi = false;
+    }
+  });
+
+  if (!lolosValidasi) {
+    // jika ada property yang beda
+    return res.status(500).send({ message: "property ada yang tidak sama" });
+  }
+  // property object req.body harus sama dengan property products
+  products[index] = { ...products[index], ...req.body };
+  return res.status(200).send(products);
+});
 
 app.listen(port, () => {
   console.log(`app listening on port ${port}`);

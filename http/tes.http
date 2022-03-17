@@ -17,3 +17,12 @@ Content-Type: application/json
     "name":"palu thor aja",
     "price": 150000
 }
+
+###
+PUT  http://localhost:5000/product/1 HTTP/1.1
+Content-Type: application/json
+
+{
+    "names":"palu thor aja",
+    "price": 150000
+}
