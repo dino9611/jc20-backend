@@ -83,7 +83,7 @@ app.delete("/product/:id", (req, res) => {
   // cari index dengan id yang dimau
   let index = products.findIndex((val) => val.id == id);
   products.splice(index, 1);
-  return res.send(products);
+  return res.status(200).send(products);
 });
 
 app.post("/product", (req, res) => {
@@ -91,7 +91,8 @@ app.post("/product", (req, res) => {
   let data = { ...req.body, id: products[products.length - 1].id + 1 };
   products.push(data);
   // response all products
-  return res.send(products);
+  return res.status(200).send(products);
+  // return res.status(200).send({message:'berhasil'});
 });
 
 app.put("/product/:id", (req, res) => {
