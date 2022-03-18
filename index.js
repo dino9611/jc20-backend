@@ -1,10 +1,31 @@
 const express = require("express");
 const app = express();
+const cors = require("cors");
 const port = 5000;
+// const customMiddleware = (req, res, next) => {
+//   console.log("lewat middleware");
+//   let err = false;
+//   if (err) {
+//     return res.status(500).send({ message: "error bro" });
+//   }
+//   // kirim data ke handler berikutnya
+//   req.bebas = "data apa maunya"; // nggak harus tapi bisa tipe data apapun
+//   next();
+// };
+
+// middleware log
+const logMiddleware = (req, res, next) => {
+  console.log(req.method, req.url, new Date().toString());
+  next();
+};
+// buat mengijinkan fronetnd akses backend
+app.use(cors());
 // buat mengaktifkan req.body
+// app.use : pemasangan middleware global
 app.use(express.json());
 // buat upload foto dan reserve file
 app.use(express.urlencoded({ extended: false }));
+app.use(logMiddleware);
 
 let products = [
   { id: 1, name: "popok hokage", price: 50000 },
@@ -31,6 +52,7 @@ app.get("/", (req, res) => {
 app.get("/product", (req, res) => {
   console.log("query isi:", req.query); // req.query adalah object
   // object bisa di destructuring
+  console.log(req.bebas, "dari line 47");
   const { maxPrice, minPrice } = req.query;
 
   let filteredProd = products.filter((val) => {
