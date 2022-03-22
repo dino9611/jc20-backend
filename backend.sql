@@ -205,29 +205,64 @@ select * from users u
 select * from users u 
 	join transactions t on t.userId = u.id;
 
-start Transaction;
+-- start Transaction;
 
-select * from users;
+-- select * from users;
 
-insert into users (lastName,FirstName,Age)
-values('arta','tanjung',16);
+-- insert into users (lastName,FirstName,Age)
+-- values('arta','tanjung',16);
 
-insert into users (lastName,FirstName,Age)
-values('andika','tanjung',17);
+-- insert into users (lastName,FirstName,Age)
+-- values('andika','tanjung',17);
 
 
-select * from users;
+-- select * from users;
 
-Rollback;
+-- Rollback;
 
-commit;
+-- commit;
+
+
 
 
 -- film_list dengan list actor didalam array pakai group concat
+select fa.film_id, f.title,
+	GROUP_CONCAT(
+		concat(a.first_name,' ',a.last_name) 
+		order by a.first_name separator ';'
+	) as actors
+	from film_actor fa
+	join film f on fa.film_id = f.film_id
+    join actor a on a.actor_id = fa.actor_id
+	group by f.film_id;
+    
 -- actor yang filmnya paling laris
+ 
+select sum(amount) as pendapatanFilm,fa.actor_id, a.first_name,a.last_name
+	from payment p
+    join rental r on p.rental_id = r.rental_id
+	join inventory i on r.inventory_id = i.inventory_id
+    join film_actor fa on fa.film_id = i.film_id
+	join actor a on a.actor_id = fa.actor_id
+    group by  fa.actor_id
+    order by pendapatanFilm desc;
 -- actor yang paling banyak main film  
+select count(*) as jumlah_film,a.actor_id,a.first_name from film_actor fa
+join actor a on fa.actor_id = a.actor_id
+group by a.actor_id ;
+
 -- pendapatan tiap toko
+
 -- film paling tidak laku 
+select f.film_id,sum(p.amount) as amountPerFilm,f.title  
+	from payment p
+    join rental r on p.rental_id = r.rental_id
+	join inventory i on r.inventory_id = i.inventory_id
+    join film f on i.film_id = f.film_id
+    group by film_id 
+    order by amountPerFilm asc
+    limit 5;
+    
 
 
 
