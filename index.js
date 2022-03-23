@@ -2,16 +2,15 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const port = 5000;
-// const customMiddleware = (req, res, next) => {
-//   console.log("lewat middleware");
-//   let err = false;
-//   if (err) {
-//     return res.status(500).send({ message: "error bro" });
-//   }
-//   // kirim data ke handler berikutnya
-//   req.bebas = "data apa maunya"; // nggak harus tapi bisa tipe data apapun
-//   next();
-// };
+const mysql = require("mysql2");
+
+const dbCon = mysql.createConnection({
+  host: "localhost",
+  user: "root",
+  password: "password",
+  database: "latihandb",
+  port: 3306,
+});
 
 // middleware log
 const logMiddleware = (req, res, next) => {
@@ -27,19 +26,19 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(logMiddleware);
 
-let products = [
-  { id: 1, name: "popok hokage", price: 50000 },
-  {
-    id: 2,
-    name: "pasir kazekage",
-    price: 20000,
-  },
-  {
-    id: 3,
-    name: "Gurita adeknya raikage",
-    price: 100000,
-  },
-];
+// let products = [
+//   { id: 1, name: "popok hokage", price: 50000 },
+//   {
+//     id: 2,
+//     name: "pasir kazekage",
+//     price: 20000,
+//   },
+//   {
+//     id: 3,
+//     name: "Gurita adeknya raikage",
+//     price: 100000,
+//   },
+// ];
 
 app.get("/", (req, res) => {
   res.status(200).send({ message: "ini hellow" });
@@ -49,19 +48,31 @@ app.get("/", (req, res) => {
 // req.params :semua punya
 // req.body //tidak dimiliki get
 
-app.get("/product", (req, res) => {
-  console.log("query isi:", req.query); // req.query adalah object
-  // object bisa di destructuring
-  console.log(req.bebas, "dari line 47");
+app.get("/product", async (req, res) => {
   const { maxPrice, minPrice } = req.query;
+  let conn = dbCon.promise();
+  // get all products
+  // inget hasil select selalu array
+  let sql = `select * from products where true `;
+  // maxprice
+  if (maxPrice) {
+    sql += `and price <= ${dbCon.escape(maxPrice)} `;
+  }
+  if (minPrice) {
+    sql += `and price >= ${dbCon.escape(minPrice)} `;
+  }
 
-  let filteredProd = products.filter((val) => {
-    return (
-      (maxPrice ? val.price <= maxPrice : true) &&
-      (minPrice ? val.price >= minPrice : true)
-    );
-  });
-  return res.send(filteredProd);
+  console.log(sql);
+  try {
+    let [result] = await conn.execute(sql);
+    // console.log("query isi:", ); // req.query adalah object
+    // object bisa di destructuring
+    console.log(result, "isi result");
+    return res.status(200).send(result);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send({ message: error.message || error });
+  }
 });
 
 app.get("/product/category", (req, res) => {
@@ -69,56 +80,117 @@ app.get("/product/category", (req, res) => {
   return res.send({ message: "tidak ada lol" });
 });
 
-app.get("/product/:id", (req, res) => {
+app.get("/product/:id", async (req, res) => {
   let { id } = req.params;
-  // param adalah yang titik dua
-  console.log(req.params);
-  let productSelected = products.find((val) => val.id == id);
-  console.log(productSelected);
-  return res.send(productSelected);
-});
-
-app.delete("/product/:id", (req, res) => {
-  let { id } = req.params;
-  // cari index dengan id yang dimau
-  let index = products.findIndex((val) => val.id == id);
-  products.splice(index, 1);
-  return res.status(200).send(products);
-});
-
-app.post("/product", (req, res) => {
-  console.log(req.body);
-  let data = { ...req.body, id: products[products.length - 1].id + 1 };
-  products.push(data);
-  // response all products
-  return res.status(200).send(products);
-  // return res.status(200).send({message:'berhasil'});
-});
-
-app.put("/product/:id", (req, res) => {
-  const { id } = req.params;
-  // cari index
-  let index = products.findIndex((val) => val.id == id);
-  // validasi property req.body sama dengan product
-  const arrProp = Object.keys(req.body); //['name','price']
-  const productProp = Object.keys(products[index]); //['name','price','id']
-  console.log(arrProp);
-  console.log(productProp, "product");
-  let lolosValidasi = true;
-  arrProp.forEach((val) => {
-    if (!productProp.includes(val)) {
-      // jika val tidak ada di productsprop
-      lolosValidasi = false;
-    }
-  });
-
-  if (!lolosValidasi) {
-    // jika ada property yang beda
-    return res.status(500).send({ message: "property ada yang tidak sama" });
+  let conn = dbCon.promise();
+  // select * from products where id = ?
+  try {
+    let sql = `select * from products where id = ?`;
+    let [productSelected] = await conn.query(sql, [id]);
+    console.log(productSelected);
+    return res.send({
+      ...productSelected[0],
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send({ message: error.message || error });
   }
-  // property object req.body harus sama dengan property products
-  products[index] = { ...products[index], ...req.body };
-  return res.status(200).send(products);
+});
+
+app.delete("/product/:id", async (req, res) => {
+  let { id } = req.params;
+  let conn = dbCon.promise();
+  // select * from products where id = ?
+  try {
+    // get data dulu
+    let sql = `select * from products where id = ?`;
+    let [result] = await conn.query(sql, [id]);
+    if (!result.length) {
+      throw { message: "id tidak ditemukan" };
+    }
+    //lalu delete
+    sql = `delete from products where id = ?`;
+    await conn.query(sql, [id]);
+    // optional boleh di get all products ulang
+    sql = `select * from products`;
+    let [products] = await conn.query(sql);
+    console.log(products);
+    return res.send(products);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send({ message: error.message || error });
+  }
+});
+
+app.post("/product", async (req, res) => {
+  // tanpa promise
+  // kalo insert parameter keduanya harus object
+  // dbCon.query(`INSERT into products set ?`, req.body, (err, result, fields) => {
+  //   if (err) {
+  //     console.log(err);
+  //     return res.status(500).send({ message: err.message });
+  //   }
+  //   console.log("jika lewati sini sql yang diatas aman");
+  //   console.log("ini result", result);
+
+  //   // jika errnya dilewati pasti berhasil
+  //   let sql = `select * from products`;
+  //   // execute untuk select saja karena perforamncenya lebih baik untuk select
+  //   dbCon.execute(sql, (err, products, fields) => {
+  //     if (err) {
+  //       console.log(err);
+  //       return res.status(500).send({ message: err.message });
+  //     }
+  //     console.log("ini fields", fields);
+  //     console.log("ini products", products);
+  //     return res.status(200).send(products);
+  //   });
+  // });
+  // cara promise
+
+  let conn = dbCon.promise();
+  try {
+    // insert
+    let sql = `INSERT into products set ?`;
+    let [result] = await conn.query(sql, req.body);
+    // response dari insert ada insertId
+    console.log("isi result insert", result);
+    sql = `select * from products`;
+    // select data perlu tempat penampungan data
+    let [products] = await conn.query(sql);
+    console.log("ini products", products);
+    return res.status(200).send(products);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send({ message: error.message || error });
+  }
+});
+
+app.put("/product/:id", async (req, res) => {
+  const { id } = req.params;
+  let conn = dbCon.promise();
+  // klo mau tambah property untuk di update
+  // let updateData = {...req.body,namacolumn:'tambahaja'}
+  try {
+    // get datanya nya dahulu
+    let sql = `select * from products where id = ?`;
+    let [result] = await conn.query(sql, [id]);
+    if (!result.length) {
+      throw { message: "id tidak ditemukan" };
+    }
+    // update data
+    sql = `Update products set ? where id = ?`;
+    // tanda tanya untuk set harus object
+    await conn.query(sql, [req.body, id]);
+    // optional boleh di get all products ulang
+    sql = `select * from products`;
+    let [products] = await conn.query(sql);
+    console.log(products);
+    return res.send(products);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send({ message: error.message || error });
+  }
 });
 
 app.listen(port, () => {
