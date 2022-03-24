@@ -12,6 +12,9 @@ const logMiddleware = (req, res, next) => {
   console.log(req.method, req.url, new Date().toString());
   next();
 };
+
+// main();
+
 // buat mengijinkan fronetnd akses backend
 app.use(cors());
 // buat mengaktifkan req.body
@@ -26,8 +29,27 @@ app.get("/", (req, res) => {
 });
 
 const { productsRoutes } = require("./src/routes");
+const { bcryptCompare } = require("./src/lib/bcrypt");
 
 app.use("/product", productsRoutes);
+
+let hasil = "$2b$05$EX5Ah9IMaTifbRYWMWl62..63R.vSkTQbfVObRg9YZXBFK7ivj/4.";
+const bcrypt = require("bcrypt");
+const { Console } = require("console");
+app.get("/compare", async (req, res) => {
+  const password = `strong91`;
+  try {
+    let match = await bcrypt.compare(password, hasil);
+    if (!match) {
+      // kalo password salah
+      throw { message: "salah password" };
+    }
+    res.send({ message: "sama passwordnya" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ message: error.message });
+  }
+});
 
 app.get("/seq/sync", (req, res) => {
   db.sequelize.sync().then(() => {
