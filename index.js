@@ -16,7 +16,11 @@ const logMiddleware = (req, res, next) => {
 // main();
 
 // buat mengijinkan fronetnd akses backend
-app.use(cors());
+app.use(
+  cors({
+    exposedHeaders: ["x-total-count"],
+  })
+);
 // buat mengaktifkan req.body method post,put,patch
 // untuk ngirim data
 // app.use : pemasangan middleware global
@@ -24,6 +28,7 @@ app.use(express.json());
 // buat upload foto dan reserve file
 app.use(express.urlencoded({ extended: false }));
 app.use(logMiddleware);
+app.use(express.static("public"));
 
 app.get("/", (req, res) => {
   res.status(200).send({ message: "ini API MATOA 1.0" });
