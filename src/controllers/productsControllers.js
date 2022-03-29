@@ -74,6 +74,9 @@ productsControllers.deleteProduct = async (req, res) => {
     //lalu delete
     sql = `delete from products where id = ?`;
     await conn.query(sql, [id]);
+    if (result[0].image) {
+      fs.unlinkSync("./public" + result[0].image);
+    }
     // optional boleh di get all products ulang
     sql = `select * from products`;
     let [products] = await conn.query(sql);
@@ -107,10 +110,21 @@ productsControllers.addproduct = async (req, res) => {
 };
 
 productsControllers.editProduct = async (req, res) => {
+  console.log("ini req.files", req.files);
+  console.log("ini req.body", req.body);
+  let path = "/products";
+  const data = JSON.parse(req.body.data); // {name:'bla',"price":34324}
+  const { products } = req.files;
+  const imagePath = products ? `${path}/${products[0].filename}` : null;
+  if (imagePath) {
+    // kalo image path tidak null
+    data.image = imagePath;
+  }
   const { id } = req.params;
   let conn = dbCon.promise();
   // klo mau tambah property untuk di update
   // let updateData = {...req.body,namacolumn:'tambahaja'}
+
   try {
     // get datanya nya dahulu
     let sql = `select * from products where id = ?`;
@@ -121,13 +135,23 @@ productsControllers.editProduct = async (req, res) => {
     // update data
     sql = `Update products set ? where id = ?`;
     // tanda tanya untuk set harus object
-    await conn.query(sql, [req.body, id]);
+    await conn.query(sql, [data, id]);
+    // setelah update hapus image
+    if (imagePath) {
+      // klo image baru ada maka hapus image lama
+      if (result[0].image) {
+        fs.unlinkSync("./public" + result[0].image);
+      }
+    }
     // optional boleh di get all products ulang
-    sql = `select * from products`;
-    let [products] = await conn.query(sql);
-    console.log(products);
-    return res.send(products);
+    // sql = `select * from products`;
+    // let [products] = await conn.query(sql);
+    // console.log(products);
+    return res.send({ message: "berhasil update" });
   } catch (error) {
+    if (imagePath) {
+      fs.unlinkSync("./public" + imagePath);
+    }
     console.log(error);
     return res.status(500).send({ message: error.message || error });
   }

@@ -69,6 +69,6 @@ router.delete("/:id", deleteProduct);
 // dengan upload
 router.post("/", uploader, addProductUpload);
 
-router.put("/:id", editProduct);
+router.put("/:id", uploader, editProduct);
 
 module.exports = router;
