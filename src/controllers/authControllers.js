@@ -11,9 +11,9 @@ module.exports = {
         data: userData,
         message,
       } = await registerService(req.body);
-      //   if (!success) {
-      //     throw { message: message };
-      //   }
+      if (!success) {
+        throw { message: message };
+      }
 
       const dataToken = {
         id: userData.id,
