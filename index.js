@@ -18,9 +18,10 @@ const logMiddleware = (req, res, next) => {
 // buat mengijinkan fronetnd akses backend
 app.use(
   cors({
-    exposedHeaders: ["x-total-count"],
+    exposedHeaders: ["x-total-count", "x-token-access"],
   })
 );
+// /verified/token
 // buat mengaktifkan req.body method post,put,patch
 // untuk ngirim data
 // app.use : pemasangan middleware global
@@ -34,9 +35,10 @@ app.get("/", (req, res) => {
   res.status(200).send({ message: "ini API MATOA 1.0" });
 });
 
-const { productsRoutes } = require("./src/routes");
+const { productsRoutes, authRoutes } = require("./src/routes");
 
 app.use("/product", productsRoutes);
+app.use("/auth", authRoutes);
 
 // const mongoose = require("mongoose");
 
