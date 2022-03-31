@@ -2,7 +2,9 @@ const { createJwtAccess, createJwtemail } = require("../lib/jwt");
 const { registerService, loginService } = require("../services/authService");
 const { dbCon } = require("./../connections");
 const nodemailer = require("nodemailer");
-
+const handlebars = require("handlebars");
+const path = require("path");
+const fs = require("fs");
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -51,13 +53,23 @@ module.exports = {
           : "http://localhost:3000";
       const link = `${host}/verified/${tokenEmail}`;
       //   kirim email
+      let filepath = path.resolve(__dirname, "../template/emailTemplate.html");
+      // ubah html jadi string pake fs.readfile
+      let htmlString = fs.readFileSync(filepath, "utf-8");
+      console.log(htmlString);
+      const template = handlebars.compile(htmlString);
+      const htmlToEmail = template({
+        username: userData.username,
+        link,
+      });
+      console.log(htmlToEmail);
       // transporter sendmail sebenarnya async
       transporter.sendMail({
         from: "Hokage <dinotestes12@gmail.com>",
-        // to: userData.email,
-        to: `dinopwdk@gmail.com`,
+        to: userData.email,
+        // to: `dinopwdk@gmail.com`,
         subject: "tolong verifikasi tugas grade A ujian chunin",
-        html: `<h1>Verifikasi email :<a href=${link}>Link veriikasi </a></h1>`,
+        html: htmlToEmail,
       });
       //   kriim data user dna token akses lagi untuk login
       res.set("x-token-access", tokenAccess);
@@ -146,17 +158,29 @@ module.exports = {
         username: username,
       };
       const tokenEmail = createJwtemail(dataToken);
+      //?kirim email verifikasi
       const host =
         process.env.NODE_ENV === "production"
           ? "http://namadomainfe"
           : "http://localhost:3000";
       const link = `${host}/verified/${tokenEmail}`;
+      // cari path email template
+      let filepath = path.resolve(__dirname, "../template/emailTemplate.html");
+      // ubah html jadi string pake fs.readfile
+      let htmlString = fs.readFileSync(filepath, "utf-8");
+      console.log(htmlString);
+      const template = handlebars.compile(htmlString);
+      const htmlToEmail = template({
+        username: username,
+        link,
+      });
+      console.log(htmlToEmail);
       await transporter.sendMail({
         from: "Hokage <dinotestes12@gmail.com>",
         // to: email,
         to: `dinopwdk@gmail.com`,
         subject: "tolong verifikasi tugas grade A ujian chunin",
-        html: `<h1>Verifikasi email :<a href=${link}>Link veriikasi </a></h1>`,
+        html: htmlToEmail,
       });
       return res.status(200).send({ message: "berhasil kirim email lagi99x" });
     } catch (error) {
@@ -165,3 +189,34 @@ module.exports = {
     }
   },
 };
+
+// let posts = [
+//   {
+//     id: 1,
+//     content: "asdsada",
+//   },
+// ];
+
+// for (let i = 0; i < posts.length; i++) {
+//   let res = await sql.query(
+//     "select * from post where post_id = post[i].id and userid"
+//   );
+//   if (res.length) {
+//     posts[i].userlikes = true;
+//   } else {
+//     posts[i].userlikes = false;
+//   }
+// }
+
+// let posts = [
+//   {
+//     id: 1,
+//     content: "asdsada",
+//     userlikes: false,
+//   },
+//   {
+//     id: 2,
+//     content: "dadsa",
+//     uselikes: false,
+//   },
+// ];

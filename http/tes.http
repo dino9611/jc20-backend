@@ -91,3 +91,13 @@ Content-Type: application/json
     "email":"dinopwdk@gmail.com",
     "password":"sipalingtampan"
 }
+
+####
+POST http://localhost:5000/auth/register HTTP/1.1
+Content-Type: application/json
+
+{
+    "username":"dikamacho",
+    "email":"andikarizkifadhila@gmail.com",
+    "password":"sipalingtampan"
+}
