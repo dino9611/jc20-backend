@@ -21,9 +21,10 @@ module.exports = {
       // create connection in pool
       conn = await dbCon.promise().getConnection();
       // hashing password
+
       password = hashPass(password);
 
-      sql = `select * from users where (username = ? or email = ?) and password = ?`;
+      sql = `select id,username,isVerified,email from users where (username = ? or email = ?) and password = ?`;
       let [result] = await conn.query(sql, [username, email, password]);
       console.log(result);
       if (!result.length) {
@@ -40,8 +41,9 @@ module.exports = {
     } catch (error) {
       conn.release();
       console.log(error);
+      throw new Error(error.message || error);
       // return new Error(error.message || error);
-      return { success: false, message: error.message || error };
+      // return { success: false, message: error.message || error };
     }
   },
   registerService: async (data) => {
@@ -57,7 +59,7 @@ module.exports = {
         // klo ada spasi masuk sini
         throw { message: "ada spasinya bro" };
       }
-
+      await conn.beginTransaction();
       sql = `select id from users where username = ? or email = ?`;
 
       let [result] = await conn.query(sql, [username, email]);
@@ -79,13 +81,16 @@ module.exports = {
       console.log(result1);
       sql = `select id,username,isVerified,email from users where id = ?`;
       let [userData] = await conn.query(sql, [result1.insertId]);
+      await conn.commit();
       conn.release();
       return { success: true, data: userData[0] };
     } catch (error) {
+      conn.rollback();
       conn.release();
       console.log(error);
-      // return new Error(error.message || error);
-      return { success: false, message: error.message || error };
+      // return Error(error.message || error);
+      throw new Error(error.message || error);
+      // return { success: false, message: error.message || error };
     }
   },
 };
