@@ -101,3 +101,13 @@ Content-Type: application/json
     "email":"andikarizkifadhila@gmail.com",
     "password":"sipalingtampan"
 }
+###
+
+POST http://localhost:5000/auth/sendemail-verified HTTP/1.1
+Content-Type: application/json
+
+{
+    "id":6,
+    "username":"dikamacho",
+    "email":"dinopwdk@gmail.com"
+}

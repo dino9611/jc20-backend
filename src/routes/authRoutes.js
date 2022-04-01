@@ -4,11 +4,12 @@ const Router = express.Router();
 const { authControllers } = require("./../controllers");
 const { register, login, keeplogin, sendEmailVerified, accountVerified } =
   authControllers;
+const verifyLastToken = require("./../lib/verifylastToken");
 
 Router.post("/register", register);
 Router.post("/login", login);
 Router.get("/keeplogin", verifyTokenAccess, keeplogin);
-Router.get("/verified", verifyTokenEmail, accountVerified);
+Router.get("/verified", verifyTokenEmail, verifyLastToken, accountVerified);
 Router.post("/sendemail-verified", sendEmailVerified);
 
 module.exports = Router;

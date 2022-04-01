@@ -1,33 +1,11 @@
 const { createJwtAccess, createJwtemail } = require("../lib/jwt");
 const { registerService, loginService } = require("../services/authService");
 const { dbCon } = require("./../connections");
-const nodemailer = require("nodemailer");
+const transporter = require("./../lib/transporter");
 const handlebars = require("handlebars");
+const myCache = require("./../lib/cache");
 const path = require("path");
 const fs = require("fs");
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: "dinotestes12@gmail.com",
-    pass: "pyicxrbtyoskvwep",
-  },
-  tls: {
-    rejectUnauthorized: false,
-  },
-});
-
-// let transporter = createTransport({
-//   host: "your domain mail server",
-//   port: 587, // 465 //587 //mo
-//   secure: false,
-//   auth: {
-//     user: "your email in mail serverd",
-//     pass: "password lu",
-//   },
-//   tls: {
-//     rejectUnauthorized: false,
-//   },
-// });
 
 module.exports = {
   // register
@@ -38,11 +16,19 @@ module.exports = {
         data: userData,
         message,
       } = await registerService(req.body);
+      //  create something/value unique
+      let timecreated = new Date().now();
 
       const dataToken = {
         id: userData.id,
         username: userData.username,
+        timecreated,
       };
+      // use node cache
+      let berhasil = myCache.set(userData.id, dataToken, 5 * 60);
+      if (!berhasil) {
+        throw { message: "error caching" };
+      }
 
       //   buat token email verified dan token untuk aksees
       const tokenAccess = createJwtAccess(dataToken);
@@ -99,7 +85,6 @@ module.exports = {
       res.set("x-token-access", tokenAccess);
       return res.status(200).send(userData);
     } catch (error) {
-      conn.release();
       console.log(error);
       return res.status(500).send({ message: error.message || error });
     }
@@ -153,10 +138,19 @@ module.exports = {
   sendEmailVerified: async (req, res) => {
     const { id, email, username } = req.body;
     try {
+      //  create something/value unique
+      let timecreated = new Date().getTime();
       const dataToken = {
         id: id,
         username: username,
+        timecreated,
       };
+      // use node cache
+      let berhasil = myCache.set(id, dataToken, 5 * 60);
+      if (!berhasil) {
+        throw { message: "error caching" };
+      }
+
       const tokenEmail = createJwtemail(dataToken);
       //?kirim email verifikasi
       const host =
@@ -177,8 +171,8 @@ module.exports = {
       console.log(htmlToEmail);
       await transporter.sendMail({
         from: "Hokage <dinotestes12@gmail.com>",
-        // to: email,
-        to: `dinopwdk@gmail.com`,
+        to: email,
+        // to: `dinopwdk@gmail.com`,
         subject: "tolong verifikasi tugas grade A ujian chunin",
         html: htmlToEmail,
       });
@@ -189,34 +183,3 @@ module.exports = {
     }
   },
 };
-
-// let posts = [
-//   {
-//     id: 1,
-//     content: "asdsada",
-//   },
-// ];
-
-// for (let i = 0; i < posts.length; i++) {
-//   let res = await sql.query(
-//     "select * from post where post_id = post[i].id and userid"
-//   );
-//   if (res.length) {
-//     posts[i].userlikes = true;
-//   } else {
-//     posts[i].userlikes = false;
-//   }
-// }
-
-// let posts = [
-//   {
-//     id: 1,
-//     content: "asdsada",
-//     userlikes: false,
-//   },
-//   {
-//     id: 2,
-//     content: "dadsa",
-//     uselikes: false,
-//   },
-// ];
