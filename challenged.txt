@@ -1,0 +1,13 @@
+user bisa pinjam buku
+user bisa dinonaktifkan dengan admin
+column waktu selsai peminjaman, waktu mulai peminjaman
+
+table 
+    - user,
+    - list buku, ada name sama iamge
+    - peminjaman ,
+    - roles,
+
+library sama jadi mohon udah diinstall
+struktur foldernya udah jadi
+
