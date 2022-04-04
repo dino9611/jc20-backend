@@ -6,11 +6,11 @@ module.exports = {
     //? tanpa express bearer token
     const authHeader = req.headers["authorization"];
     let token;
-    console.log(authHeader); // `Bearer `
+    // console.log(authHeader); // `Bearer `
     if (authHeader) {
       token = authHeader.split(" ")[1] ? authHeader.split(" ")[1] : authHeader;
       // ini bearer
-      console.log(token);
+      // console.log(token);
     } else {
       token = null;
     }
@@ -34,11 +34,11 @@ module.exports = {
     //? tanpa express bearer token
     const authHeader = req.headers["authorization"];
     let token;
-    console.log(authHeader); // `Bearer `
+    // console.log(authHeader); // `Bearer `
     if (authHeader) {
       token = authHeader.split(" ")[1] ? authHeader.split(" ")[1] : authHeader;
       // ini bearer
-      console.log(token);
+      // console.log(token);
     } else {
       token = null;
     }

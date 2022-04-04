@@ -17,7 +17,7 @@ module.exports = {
         message,
       } = await registerService(req.body);
       //  create something/value unique
-      let timecreated = new Date().now();
+      let timecreated = new Date().getTime();
 
       const dataToken = {
         id: userData.id,
