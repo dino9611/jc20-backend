@@ -5,7 +5,7 @@ const http = require("http");
 const server = http.createServer(app);
 const { Server } = require("socket.io");
 const cors = require("cors");
-const port = 5000;
+const port = process.env.PORT || 5000;
 // const {dbCon} =require('./src/connections')
 // const db = require("./src/models");
 
@@ -47,11 +47,11 @@ app.get("/", (req, res) => {
   res.status(200).send({ message: "ini API MATOA 1.0" });
 });
 
-const { productsRoutes, authRoutes } = require("./src/routes");
-const { dbCon } = require("./src/connections");
+// const { productsRoutes, authRoutes } = require("./src/routes");
+// const { dbCon } = require("./src/connections");
 
-app.use("/product", productsRoutes);
-app.use("/auth", authRoutes);
+// app.use("/product", productsRoutes);
+// app.use("/auth", authRoutes);
 
 const { auth } = require("express-oauth2-jwt-bearer");
 
@@ -67,63 +67,63 @@ app.get("/api/private", checkJwt, function (req, res) {
   });
 });
 
-app.get("/mess", async (req, res) => {
-  const { recepient_id, sender_id } = req.query;
-  let conn, sql;
-  try {
-    conn = dbCon.promise();
-    sql = `select * from chat where sender_id in(?,?) and recepient_id in(?,?)`;
-    let [result] = await conn.query(sql, [
-      sender_id,
-      recepient_id,
-      sender_id,
-      recepient_id,
-    ]);
-    res.send(result);
-  } catch (error) {
-    console.log(error);
-    return res.status(500).send({ message: "error network" });
-  }
-});
+// app.get("/mess", async (req, res) => {
+//   const { recepient_id, sender_id } = req.query;
+//   let conn, sql;
+//   try {
+//     conn = dbCon.promise();
+//     sql = `select * from chat where sender_id in(?,?) and recepient_id in(?,?)`;
+//     let [result] = await conn.query(sql, [
+//       sender_id,
+//       recepient_id,
+//       sender_id,
+//       recepient_id,
+//     ]);
+//     res.send(result);
+//   } catch (error) {
+//     console.log(error);
+//     return res.status(500).send({ message: "error network" });
+//   }
+// });
 
-app.get("/mess/public", (req, res) => {
-  res.send(arrMsg);
-});
+// app.get("/mess/public", (req, res) => {
+//   res.send(arrMsg);
+// });
 
-app.post("/mess/public", (req, res) => {
-  // {
-  //   id:1,
-  //   username:'dikamacho',
-  //   content:'message'
-  // }
-  arrMsg.push(req.body);
-  io.emit("send-message", arrMsg);
-  res.status(200).send({ message: "berhasil" });
-});
+// app.post("/mess/public", (req, res) => {
+//   // {
+//   //   id:1,
+//   //   username:'dikamacho',
+//   //   content:'message'
+//   // }
+//   arrMsg.push(req.body);
+//   io.emit("send-message", arrMsg);
+//   res.status(200).send({ message: "berhasil" });
+// });
 
-app.post("/sendmess", async (req, res) => {
-  const { sender_id, recepient_id, public } = req.body;
-  let conn, sql;
-  try {
-    conn = dbCon.promise();
-    sql = `INSERT into chat set ?`;
-    await conn.query(sql, req.body);
-    sql = `select * from chat where sender_id in(?,?) and recepient_id in(?,?)`;
-    let [result] = await conn.query(sql, [
-      sender_id,
-      recepient_id,
-      sender_id,
-      recepient_id,
-    ]);
-    io.to(recepient_id)
-      .to(sender_id)
-      .emit("chat-masuk", result, recepient_id, sender_id);
-    res.send({ message: "berhasil kirim" });
-  } catch (error) {
-    console.log(error);
-    return res.status(500).send({ message: "error network" });
-  }
-});
+// app.post("/sendmess", async (req, res) => {
+//   const { sender_id, recepient_id, public } = req.body;
+//   let conn, sql;
+//   try {
+//     conn = dbCon.promise();
+//     sql = `INSERT into chat set ?`;
+//     await conn.query(sql, req.body);
+//     sql = `select * from chat where sender_id in(?,?) and recepient_id in(?,?)`;
+//     let [result] = await conn.query(sql, [
+//       sender_id,
+//       recepient_id,
+//       sender_id,
+//       recepient_id,
+//     ]);
+//     io.to(recepient_id)
+//       .to(sender_id)
+//       .emit("chat-masuk", result, recepient_id, sender_id);
+//     res.send({ message: "berhasil kirim" });
+//   } catch (error) {
+//     console.log(error);
+//     return res.status(500).send({ message: "error network" });
+//   }
+// });
 
 io.on("connection", (socket) => {
   console.log("connect", socket.handshake.auth);
