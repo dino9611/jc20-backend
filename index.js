@@ -53,6 +53,20 @@ const { dbCon } = require("./src/connections");
 app.use("/product", productsRoutes);
 app.use("/auth", authRoutes);
 
+const { auth } = require("express-oauth2-jwt-bearer");
+
+const checkJwt = auth({
+  audience: "https://api.matoa.com",
+  issuerBaseURL: `https://dev-qdeojlzi.us.auth0.com/`,
+});
+
+app.get("/api/private", checkJwt, function (req, res) {
+  res.json({
+    message:
+      "Hello from a private endpoint! You need to be authenticated to see this.",
+  });
+});
+
 app.get("/mess", async (req, res) => {
   const { recepient_id, sender_id } = req.query;
   let conn, sql;
