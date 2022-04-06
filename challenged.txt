@@ -66,7 +66,7 @@ user bisa meminjam lebih dari satu buku dengan durasi yang berbeda
     buku:[{durasi:2,bookid:2},{durasi:3,bookid:1}]
 }
 url:/pinjaman
-proteksi dengan token 
+proteksi dengan token user
 id di token dan userid harus di bandingkan dan harus sama
 
 

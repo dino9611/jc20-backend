@@ -31,9 +31,10 @@ app.get("/", (req, res) => {
   res.status(200).send({ message: "ini API backend challenges" });
 });
 
-const { chauthRoutes } = require("./src/routes");
+const { chauthRoutes, bukuRoutes } = require("./src/routes");
 
 app.use("/auth", chauthRoutes);
+app.use("/books", bukuRoutes);
 
 app.listen(port, () => {
   console.log(`app listening on port ${port}`);
