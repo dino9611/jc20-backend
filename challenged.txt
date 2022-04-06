@@ -59,6 +59,16 @@ method : get
 )
 
 
+tantangan pinjaman 
+user bisa meminjam lebih dari satu buku dengan durasi yang berbeda
+{   
+    userId:1
+    buku:[{durasi:2,bookid:2},{durasi:3,bookid:1}]
+}
+url:/pinjaman
+proteksi dengan token 
+id di token dan userid harus di bandingkan dan harus sama
+
 
 
 
