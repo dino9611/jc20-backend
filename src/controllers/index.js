@@ -8,3 +8,8 @@ module.exports = {
   chauthControllers,
   bukuControllers,
 };
+
+let today = new Date();
+console.log(today);
+let tomorrow = today.setDate(today.getDate() + 1);
+console.log(new Date(tomorrow));

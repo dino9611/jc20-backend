@@ -27,4 +27,40 @@ module.exports = {
       return res.status(500).send({ message: error.message || error });
     }
   },
+  addpinjaman: async (req, res) => {
+    const { userId, buku } = req.body;
+    let conn, sql;
+    try {
+      conn = await dbCon.promise().getConnection();
+      // input ke table pinjaman
+      await conn.beginTransaction();
+      sql = `insert into pinjaman set ?`;
+      let insertData = {
+        status: "minjem",
+        users_id: userId,
+      };
+      let [pinjaman] = await conn.query(sql, insertData);
+      sql = `insert into pinjaman_details set ?`;
+      let today = new Date();
+      for (let i = 0; i < buku.length; i++) {
+        let val = buku[i];
+        let exp = today.setDate(today.getDate() + val.durasi);
+        let insertData1 = {
+          buku_id: val.bookid,
+          pinjaman_id: pinjaman.insertId,
+          waktupinjam: today,
+          waktuexp: new Date(exp),
+        };
+        await conn.query(sql, insertData1);
+      }
+      await conn.commit();
+      conn.release();
+      return res.status(200).send({ message: "berhasil" });
+    } catch (error) {
+      await conn.rollback();
+      conn.release();
+      console.log(error);
+      return res.status(500).send({ message: error.message || error });
+    }
+  },
 };

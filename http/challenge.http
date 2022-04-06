@@ -14,7 +14,7 @@ Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwidXNlcm5hbWUiOiJhZG1pbiIsInJvbGVzX2lkIjoxLCJpYXQiOjE2NDkyMjQ3MTksImV4cCI6MTY0OTI2MDcxOX0.l85mkhc5-O7r9rCsF3XOlMGKuK531lzVJICkf3bbN3w
 
 {
-    "username":"admin",
+    "username":"aqilmacho",
     "email":"andikarizkifadhila@gmail.com",
     "password":"sipali2ngtam"
 }
@@ -31,9 +31,9 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwidXNlcm5hb
 
 ###
 
-POST   http://localhost:5000/pinjaman HTTP/1.1
+POST   http://localhost:5000/books/pinjaman HTTP/1.1
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwidXNlcm5hbWUiOiJhZG1pbiIsInJvbGVzX2lkIjoxLCJpYXQiOjE2NDkyMjQ3MTksImV4cCI6MTY0OTI2MDcxOX0.l85mkhc5-O7r9rCsF3XOlMGKuK531lzVJICkf3bbN3w
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NiwidXNlcm5hbWUiOiJhcWlsbWFjaG8iLCJyb2xlc19pZCI6MiwiaWF0IjoxNjQ5MjM1MTQ4LCJleHAiOjE2NDkyNzExNDh9.euTUkIbxPRqBQmgemJNpQgATXYLq6F75g665gvy6_OM
 
 {
     "userId":1,
