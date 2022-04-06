@@ -11,3 +11,59 @@ table
 library sama jadi mohon udah diinstall
 struktur foldernya udah jadi
 
+tantangan 1 (20 menit)
+register method post {username,email,password,confirmpassword}
+url:/auth/register
+1. username tidak ada yang boleh sama, tapi email boleh sama
+2. validasi password syarat 8 character, huruf, dan angka.
+2a. password dan confirmpassword harus sama kalo tidak error
+3. password dihashing
+4. berikan token akses berikan role di token. kriim token by headers
+
+login method post {username,password}
+url:/auth/login
+1. username saja
+2. password
+3. berikan token akses berikan role di akses.
+
+
+tangtangan 2 (15 menit)
+deactive user
+method :patch
+url: auth/deactive ,body {userId}
+? useridnya adalah userid yang mau di deactive
+
+1. harus diproteksi dengan token.
+2. yang deactive hanya admin user tidak boleh. 
+
+tantangan 3 add data buku (20 menit)
+add buku
+method: post
+url : book/
+
+1. image buku harus terupload kalo tidak berikan error
+2. nama buku tidak boleh kosong
+
+
+tantangan searching buku by name (15 menit) 
+by default page = 1 dan limit = 5 , no order
+get buku
+method : get
+- url:book (ambil semua buku )
+- url:book?name='habits' (ambil semua buku dengan judul yang ada habitsnya )
+- url:book?name='habits'&page=2&limit=5 
+(ambil semua buku dengan judul yang ada habitsnya )
+- url:book?name='habits'&page=2&limit=6&sortby=name&sort=desc 
+(   ambil semua buku dengan judul yang ada habitsnya,
+    di page 2,limit=6, dan harus di sorting nama desc 
+)
+
+
+
+
+
+
+
+
+
+

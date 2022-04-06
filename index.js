@@ -25,12 +25,15 @@ app.use(
 app.use(express.json());
 // buat upload foto dan reserve file
 app.use(express.urlencoded({ extended: false }));
-app.use(logMiddleware);
 app.use(express.static("public"));
 
 app.get("/", (req, res) => {
   res.status(200).send({ message: "ini API backend challenges" });
 });
+
+const { chauthRoutes } = require("./src/routes");
+
+app.use("/auth", chauthRoutes);
 
 app.listen(port, () => {
   console.log(`app listening on port ${port}`);
