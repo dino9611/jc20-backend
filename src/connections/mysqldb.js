@@ -1,10 +1,19 @@
 const mysql = require("mysql2");
 
+// const dbCon = mysql.createPool({
+//   host: "localhost",
+//   user: "root",
+//   password: "password",
+//   database: "latihandb",
+//   port: 3306,
+//   connectionLimit: 10,
+// });
+
 const dbCon = mysql.createPool({
   host: "localhost",
   user: "root",
   password: "password",
-  database: "latihandb",
+  database: "bukudb",
   port: 3306,
   connectionLimit: 10,
 });
